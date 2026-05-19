@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bass Clef Trainer</title>
+<title>Sight Reading Trainer</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -221,8 +221,8 @@ h1 { font-size: 1.8rem; font-weight: 700; color: #58a6ff; }
 <body>
 
 <header>
-  <h1>Bass Clef Trainer</h1>
-  <p class="tagline">Master bass clef note reading</p>
+  <h1>Sight Reading Trainer</h1>
+  <p class="tagline">Master clef note reading</p>
 </header>
 
 <div class="stats">
@@ -261,11 +261,16 @@ h1 { font-size: 1.8rem; font-weight: 700; color: #58a6ff; }
 </div>
 
 <div class="settings">
-  <div class="settings-title">Note Range</div>
-  <div class="range-btns">
-    <button class="range-btn active" onclick="setRange('beginner',this)">Beginner<br>G2 – A3</button>
-    <button class="range-btn" onclick="setRange('intermediate',this)">Intermediate<br>E2 – C4</button>
-    <button class="range-btn" onclick="setRange('advanced',this)">Advanced<br>C2 – D4</button>
+  <div class="settings-title">Clef</div>
+  <div class="range-btns" id="clefBtns">
+    <button class="range-btn active" onclick="setClef('bass',this)">Bass Clef</button>
+    <button class="range-btn" onclick="setClef('alto',this)">Alto Clef</button>
+  </div>
+  <div class="settings-title" style="margin-top:12px">Note Range</div>
+  <div class="range-btns" id="rangeBtns">
+    <button class="range-btn active" id="rangeBtn-beginner" onclick="setRange('beginner',this)">Beginner<br><span id="rangeLabel-beginner">G2 – A3</span></button>
+    <button class="range-btn" id="rangeBtn-intermediate" onclick="setRange('intermediate',this)">Intermediate<br><span id="rangeLabel-intermediate">E2 – C4</span></button>
+    <button class="range-btn" id="rangeBtn-advanced" onclick="setRange('advanced',this)">Advanced<br><span id="rangeLabel-advanced">C2 – D4</span></button>
   </div>
   <div class="ref-toggle-row">
     <button class="ref-btn" id="refToggleBtn" onclick="toggleRef()">Show Note Reference Chart</button>
@@ -280,8 +285,8 @@ h1 { font-size: 1.8rem; font-weight: 700; color: #58a6ff; }
 </div>
 
 <script>
-// ── Note definitions ──────────────────────────────────────────────────────────
-// pos: staff position where 0 = G2 (bottom line); each step = one note
+// ── Bass clef note definitions ─────────────────────────────────────────────────
+// pos: staff position where 0 = bottom line; each step = one note
 const NOTES = [
   { name:'C2', letter:'C', pos:-4 },
   { name:'D2', letter:'D', pos:-3 },
@@ -307,8 +312,40 @@ const RANGES = {
   advanced:     { min:-4,  max:11  },
 };
 
+// ── Alto clef note definitions ─────────────────────────────────────────────────
+// pos: same formula; bottom line = F3 (pos 0), middle (3rd) line = C4 (pos 4)
+const ALTO_NOTES = [
+  { name:'B2', letter:'B', pos:-4 },
+  { name:'C3', letter:'C', pos:-3 },
+  { name:'D3', letter:'D', pos:-2 },
+  { name:'E3', letter:'E', pos:-1 },
+  { name:'F3', letter:'F', pos: 0 },
+  { name:'G3', letter:'G', pos: 1 },
+  { name:'A3', letter:'A', pos: 2 },
+  { name:'B3', letter:'B', pos: 3 },
+  { name:'C4', letter:'C', pos: 4 },
+  { name:'D4', letter:'D', pos: 5 },
+  { name:'E4', letter:'E', pos: 6 },
+  { name:'F4', letter:'F', pos: 7 },
+  { name:'G4', letter:'G', pos: 8 },
+  { name:'A4', letter:'A', pos: 9 },
+  { name:'B4', letter:'B', pos:10 },
+  { name:'C5', letter:'C', pos:11 },
+];
+
+const ALTO_RANGES = {
+  beginner:     { min: 0,  max: 8  },
+  intermediate: { min:-2,  max:10  },
+  advanced:     { min:-4,  max:11  },
+};
+
+const RANGE_LABELS = {
+  bass: { beginner:'G2 – A3', intermediate:'E2 – C4', advanced:'C2 – D4' },
+  alto: { beginner:'F3 – G4', intermediate:'D3 – B4', advanced:'B2 – C5' },
+};
+
 // ── SVG layout constants ───────────────────────────────────────────────────────
-const BY      = 108;   // y of pos=0 (G2 bottom line)
+const BY      = 108;   // y of pos=0 (bottom line)
 const STEP    = 6;     // px per note step
 const SL      = 90;    // staff left x
 const SR      = 480;   // staff right x
@@ -316,6 +353,7 @@ const NOTE_X  = 290;   // x of quiz note head
 const LHW     = 20;    // ledger line half-width
 
 // ── State ─────────────────────────────────────────────────────────────────────
+let clef       = 'bass';
 let range      = 'beginner';
 let current    = null;
 let answered   = false;
@@ -326,9 +364,9 @@ let refOpen    = false;
 let startTime  = null;
 let timerHandle= null;
 
-// Adaptive weighting: track errors per note
+// Adaptive weighting: track errors per note name (shared across clefs)
 const weights = {};
-NOTES.forEach(n => { weights[n.name] = 1; });
+[...NOTES, ...ALTO_NOTES].forEach(n => { if (!weights[n.name]) weights[n.name] = 1; });
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const posY = pos => BY - pos * STEP;
@@ -378,13 +416,55 @@ function drawBassClef(svg) {
      + 'C362.19,57.164,265.688,0,176.014,0z',
     fill: '#111'
   }, g);
-  // Dots: G3 space (y=66) and E3 space (y=78), x aligned with beak right edge
+  // Two dots alongside the beak: above and below F3 line
   el('circle', { cx: 77, cy: 66, r: 7, fill: '#111' }, svg);
   el('circle', { cx: 77, cy: 78, r: 7, fill: '#111' }, svg);
 }
 
+function drawAltoClef(svg) {
+  // Path from alto_Clef.svg (path19). Source viewBox spans x 4752–6284, y 5217–7579.
+  // Scale = 48px / 2362 source units = 0.0203. Translate maps source origin to staff coords.
+  const g = el('g', { transform: 'translate(-92.6,-46) scale(0.0203)' }, svg);
+  el('path', {
+    d: 'M 4752,7579 L 4752,5273 L 4752,5222 L 5018,5222 L 5018,7528 L 5018,7579 L 4752,7579 z'
+     + ' M 5152,7579 L 5152,5273 L 5152,5222 L 5237,5222 L 5237,6377'
+     + ' C 5279,6355 5322,6310 5364,6239 C 5407,6169 5443,6095 5471,6016'
+     + ' C 5499,5937 5514,5879 5516,5841 C 5529,5925 5550,5992 5578,6043'
+     + ' C 5607,6093 5638,6129 5674,6151 C 5710,6172 5745,6183 5781,6183'
+     + ' C 5870,6183 5926,6143 5950,6062 C 5974,5981 5986,5882 5986,5765'
+     + ' C 5986,5712 5985,5664 5982,5622 C 5979,5580 5973,5537 5962,5494'
+     + ' C 5952,5451 5935,5412 5911,5378 C 5886,5344 5854,5320 5814,5308'
+     + ' C 5778,5298 5742,5293 5707,5293 C 5675,5293 5648,5299 5627,5310'
+     + ' C 5605,5321 5593,5338 5591,5358 C 5596,5376 5608,5397 5629,5422'
+     + ' C 5650,5446 5664,5465 5672,5477 C 5680,5489 5684,5506 5684,5529'
+     + ' C 5684,5570 5670,5604 5642,5632 C 5614,5660 5577,5675 5530,5675'
+     + ' C 5484,5675 5446,5658 5418,5625 C 5390,5591 5375,5551 5373,5506'
+     + ' C 5377,5445 5399,5392 5438,5348 C 5478,5305 5527,5272 5586,5250'
+     + ' C 5645,5228 5704,5217 5764,5217 C 5832,5217 5897,5229 5959,5253'
+     + ' C 6022,5277 6078,5313 6126,5359 C 6175,5406 6214,5463 6242,5531'
+     + ' C 6270,5598 6284,5675 6284,5760 C 6284,5878 6262,5976 6219,6053'
+     + ' C 6175,6131 6119,6189 6051,6225 C 5982,6261 5909,6281 5832,6283'
+     + ' C 5752,6278 5685,6260 5632,6229 L 5526,6401 L 5632,6572'
+     + ' C 5705,6542 5777,6527 5847,6527 C 5936,6527 6013,6553 6080,6603'
+     + ' C 6146,6654 6197,6719 6232,6800 C 6266,6881 6284,6964 6284,7050'
+     + ' C 6284,7144 6263,7232 6221,7313 C 6179,7394 6120,7458 6044,7507'
+     + ' C 5967,7555 5880,7579 5781,7579 C 5666,7574 5570,7547 5493,7497'
+     + ' C 5416,7448 5378,7374 5378,7277 C 5382,7230 5399,7194 5429,7167'
+     + ' C 5459,7139 5491,7125 5526,7122 C 5568,7122 5606,7137 5639,7167'
+     + ' C 5672,7196 5689,7233 5689,7277 C 5689,7294 5685,7310 5677,7325'
+     + ' C 5669,7339 5658,7356 5642,7376 C 5626,7395 5615,7409 5609,7418'
+     + ' C 5603,7428 5598,7439 5596,7453 C 5596,7471 5607,7486 5630,7498'
+     + ' C 5652,7510 5681,7517 5716,7520 C 5826,7515 5899,7468 5936,7381'
+     + ' C 5972,7292 5990,7183 5990,7050 C 5990,6935 5977,6834 5951,6748'
+     + ' C 5925,6661 5869,6618 5781,6618 C 5703,6618 5643,6651 5601,6719'
+     + ' C 5559,6786 5532,6865 5520,6956 C 5507,6879 5487,6805 5458,6734'
+     + ' C 5429,6662 5396,6599 5357,6545 C 5320,6492 5279,6449 5237,6419'
+     + ' L 5237,7579 L 5152,7579 z',
+    fill: '#111'
+  }, g);
+}
+
 function drawStaffLines(svg, staffRight) {
-  // Lines start from x=4 so they run behind the clef symbol (authentic notation)
   for (let i = 0; i <= 4; i++) {
     el('line', {
       x1: 4, y1: posY(i*2),
@@ -397,7 +477,6 @@ function drawStaffLines(svg, staffRight) {
 function drawNote(svg, pos, nx, noteR=10, color='#1a1a2e') {
   const ny = posY(pos);
 
-  // Ledger lines
   for (const lp of ledgersFor(pos)) {
     el('line', {
       x1: nx - LHW, y1: posY(lp),
@@ -406,10 +485,8 @@ function drawNote(svg, pos, nx, noteR=10, color='#1a1a2e') {
     }, svg);
   }
 
-  // Note head
   el('ellipse', { cx: nx, cy: ny, rx: noteR, ry: noteR*0.7, fill: color }, svg);
 
-  // Stem (up if below middle D3, down if above)
   const up = pos < 4;
   const sx = up ? nx + noteR : nx - noteR;
   el('line', {
@@ -423,7 +500,8 @@ function drawQuizStaff(pos) {
   const svg = document.getElementById('staffSvg');
   svg.innerHTML = '';
   drawStaffLines(svg, SR);
-  drawBassClef(svg);
+  if (clef === 'alto') drawAltoClef(svg);
+  else drawBassClef(svg);
   drawNote(svg, pos, NOTE_X);
 }
 
@@ -435,23 +513,22 @@ function drawRefChart() {
   const startX = SL + gap;
   const noteR  = Math.min(9, gap * 0.4);
 
-  // Height: staff + label space below + space above for high notes
-  const topNote  = notes.reduce((mn, n) => n.pos > mn ? n.pos : mn, 0);
-  const botNote  = notes.reduce((mx, n) => n.pos < mx ? n.pos : mx, 0);
-  const svgH     = Math.max(165, BY - botNote*STEP + 40);
-  const labelY   = BY - botNote*STEP + 25;
+  const topNote = notes.reduce((mn, n) => n.pos > mn ? n.pos : mn, 0);
+  const botNote = notes.reduce((mx, n) => n.pos < mx ? n.pos : mx, 0);
+  const svgH    = Math.max(165, BY - botNote*STEP + 40);
+  const labelY  = BY - botNote*STEP + 25;
 
   const refSvg = document.getElementById('refSvg');
   refSvg.setAttribute('viewBox', `0 0 520 ${svgH}`);
   refSvg.innerHTML = '';
 
   drawStaffLines(refSvg, SR);
-  drawBassClef(refSvg);
+  if (clef === 'alto') drawAltoClef(refSvg);
+  else drawBassClef(refSvg);
 
   notes.forEach((note, i) => {
     const nx = startX + i * gap;
     drawNote(refSvg, note.pos, nx, noteR, '#2a2a6a');
-
     el('text', {
       x: nx, y: labelY,
       'text-anchor': 'middle',
@@ -486,8 +563,10 @@ function stopTimer() {
 
 // ── Game logic ────────────────────────────────────────────────────────────────
 function activeNotes() {
-  const r = RANGES[range];
-  return NOTES.filter(n => n.pos >= r.min && n.pos <= r.max);
+  const notes  = clef === 'alto' ? ALTO_NOTES : NOTES;
+  const ranges = clef === 'alto' ? ALTO_RANGES : RANGES;
+  const r = ranges[range];
+  return notes.filter(n => n.pos >= r.min && n.pos <= r.max);
 }
 
 function pickNote() {
@@ -554,9 +633,23 @@ function answer(letter, btn) {
 }
 
 // ── UI controls ───────────────────────────────────────────────────────────────
+function setClef(c, btnEl) {
+  clef = c;
+  document.querySelectorAll('#clefBtns .range-btn').forEach(b => b.classList.remove('active'));
+  btnEl.classList.add('active');
+  ['beginner','intermediate','advanced'].forEach(r => {
+    document.getElementById('rangeLabel-' + r).textContent = RANGE_LABELS[c][r];
+  });
+  range = 'beginner';
+  document.querySelectorAll('#rangeBtns .range-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('rangeBtn-beginner').classList.add('active');
+  nextNote();
+  if (refOpen) drawRefChart();
+}
+
 function setRange(r, btnEl) {
   range = r;
-  document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#rangeBtns .range-btn').forEach(b => b.classList.remove('active'));
   btnEl.classList.add('active');
   nextNote();
   if (refOpen) drawRefChart();
