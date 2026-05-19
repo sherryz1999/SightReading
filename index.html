@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bass Clef Trainer</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #0d1117;
+  color: #e6edf3;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  gap: 14px;
+}
+
+header { text-align: center; }
+
+h1 { font-size: 1.8rem; font-weight: 700; color: #58a6ff; }
+.tagline { color: #8b949e; font-size: 0.85rem; margin-top: 3px; }
+
+.stats {
+  display: flex;
+  gap: 24px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  padding: 12px 28px;
+}
+.stat { text-align: center; }
+.stat-label { font-size: 0.68rem; text-transform: uppercase; color: #8b949e; letter-spacing: .06em; }
+.stat-value { font-size: 1.6rem; font-weight: 700; color: #58a6ff; }
+#streak { color: #f78166; }
+
+.timer-display {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #8b949e;
+  margin-bottom: 10px;
+  letter-spacing: .02em;
+  transition: color .2s;
+}
+.timer-display.fast { color: #3fb950; }
+.timer-display.slow { color: #f78166; }
+
+.main-card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 16px;
+  padding: 22px;
+  width: 100%;
+  max-width: 560px;
+}
+
+.staff-wrapper {
+  background: #fffef5;
+  border-radius: 10px;
+  padding: 6px 10px;
+  margin-bottom: 18px;
+  line-height: 0;
+}
+
+#staffSvg {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+.reveal-area {
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.note-revealed { font-size: 2.4rem; font-weight: 700; color: #58a6ff; }
+.feedback-msg { font-size: 1rem; font-weight: 600; }
+.feedback-msg.ok  { color: #3fb950; }
+.feedback-msg.bad { color: #f78166; }
+
+.hint {
+  text-align: center;
+  color: #8b949e;
+  font-size: 0.82rem;
+  margin-bottom: 12px;
+  min-height: 18px;
+}
+
+.buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 7px;
+  margin-bottom: 13px;
+}
+.note-btn {
+  padding: 15px 0;
+  border: 2px solid #21262d;
+  background: #21262d;
+  color: #e6edf3;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .12s;
+  user-select: none;
+}
+.note-btn:hover:not(:disabled) { background: #2d333b; border-color: #58a6ff; }
+.note-btn:disabled { cursor: default; }
+.note-btn.correct { background: #1c3a25; border-color: #3fb950; color: #3fb950; }
+.note-btn.wrong   { background: #3a1c1c; border-color: #f78166; color: #f78166; }
+
+.next-btn {
+  width: 100%;
+  padding: 13px;
+  background: #238636;
+  border: 1px solid #2ea043;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+  display: none;
+}
+.next-btn:hover { background: #2ea043; }
+.next-btn.show  { display: block; }
+
+.kbd-hint {
+  text-align: center;
+  font-size: 0.72rem;
+  color: #484f58;
+  margin-top: 9px;
+}
+
+.settings {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 16px;
+  padding: 16px 22px;
+  width: 100%;
+  max-width: 560px;
+}
+.settings-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #8b949e;
+  margin-bottom: 9px;
+}
+.range-btns { display: flex; gap: 7px; }
+.range-btn {
+  flex: 1;
+  padding: 10px 6px;
+  border: 2px solid #21262d;
+  background: #21262d;
+  color: #8b949e;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.5;
+  transition: all .15s;
+}
+.range-btn.active { border-color: #58a6ff; color: #58a6ff; background: #0e1f35; }
+
+.ref-toggle-row { text-align: center; margin-top: 11px; }
+.ref-btn {
+  background: none;
+  border: 1px solid #30363d;
+  color: #8b949e;
+  border-radius: 6px;
+  padding: 6px 16px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  transition: all .15s;
+}
+.ref-btn:hover { border-color: #58a6ff; color: #58a6ff; }
+
+.ref-panel {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 14px;
+  padding: 16px 20px;
+  width: 100%;
+  max-width: 560px;
+  display: none;
+}
+.ref-panel.show { display: block; }
+.ref-panel-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #8b949e;
+  margin-bottom: 10px;
+}
+.ref-staff-wrap {
+  background: #fffef5;
+  border-radius: 8px;
+  padding: 6px 8px;
+  line-height: 0;
+  overflow-x: auto;
+}
+#refSvg { display: block; width: 100%; height: auto; }
+
+@media (max-width: 480px) {
+  .note-btn { font-size: 0.95rem; padding: 12px 0; }
+  .stats { gap: 14px; padding: 10px 16px; }
+  .buttons-grid { gap: 4px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Bass Clef Trainer</h1>
+  <p class="tagline">Master bass clef note reading</p>
+</header>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-label">Score</div>
+    <div class="stat-value" id="score">0</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Streak</div>
+    <div class="stat-value" id="streak">0</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Accuracy</div>
+    <div class="stat-value" id="accuracy">—</div>
+  </div>
+</div>
+
+<div class="main-card">
+  <div class="staff-wrapper">
+    <svg id="staffSvg" viewBox="0 0 520 170" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <div class="timer-display" id="timerDisplay">0.0s</div>
+
+  <div class="reveal-area">
+    <div id="revealContent"></div>
+  </div>
+
+  <p class="hint" id="hintText"></p>
+
+  <div class="buttons-grid" id="buttonsGrid"></div>
+
+  <button class="next-btn" id="nextBtn" onclick="nextNote()">Next Note →</button>
+
+  <p class="kbd-hint">Keyboard: press A–G to answer &nbsp;·&nbsp; Enter / Space for next</p>
+</div>
+
+<div class="settings">
+  <div class="settings-title">Note Range</div>
+  <div class="range-btns">
+    <button class="range-btn active" onclick="setRange('beginner',this)">Beginner<br>G2 – A3</button>
+    <button class="range-btn" onclick="setRange('intermediate',this)">Intermediate<br>E2 – C4</button>
+    <button class="range-btn" onclick="setRange('advanced',this)">Advanced<br>C2 – D4</button>
+  </div>
+  <div class="ref-toggle-row">
+    <button class="ref-btn" id="refToggleBtn" onclick="toggleRef()">Show Note Reference Chart</button>
+  </div>
+</div>
+
+<div class="ref-panel" id="refPanel">
+  <div class="ref-panel-title">Note Reference Chart</div>
+  <div class="ref-staff-wrap">
+    <svg id="refSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+</div>
+
+<script>
+// ── Note definitions ──────────────────────────────────────────────────────────
+// pos: staff position where 0 = G2 (bottom line); each step = one note
+const NOTES = [
+  { name:'C2', letter:'C', pos:-4 },
+  { name:'D2', letter:'D', pos:-3 },
+  { name:'E2', letter:'E', pos:-2 },
+  { name:'F2', letter:'F', pos:-1 },
+  { name:'G2', letter:'G', pos: 0 },
+  { name:'A2', letter:'A', pos: 1 },
+  { name:'B2', letter:'B', pos: 2 },
+  { name:'C3', letter:'C', pos: 3 },
+  { name:'D3', letter:'D', pos: 4 },
+  { name:'E3', letter:'E', pos: 5 },
+  { name:'F3', letter:'F', pos: 6 },
+  { name:'G3', letter:'G', pos: 7 },
+  { name:'A3', letter:'A', pos: 8 },
+  { name:'B3', letter:'B', pos: 9 },
+  { name:'C4', letter:'C', pos:10 },
+  { name:'D4', letter:'D', pos:11 },
+];
+
+const RANGES = {
+  beginner:     { min: 0,  max: 8  },
+  intermediate: { min:-2,  max:10  },
+  advanced:     { min:-4,  max:11  },
+};
+
+// ── SVG layout constants ───────────────────────────────────────────────────────
+const BY      = 108;   // y of pos=0 (G2 bottom line)
+const STEP    = 6;     // px per note step
+const SL      = 90;    // staff left x
+const SR      = 480;   // staff right x
+const NOTE_X  = 290;   // x of quiz note head
+const LHW     = 20;    // ledger line half-width
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let range      = 'beginner';
+let current    = null;
+let answered   = false;
+let score      = 0;
+let streak     = 0;
+let total      = 0;
+let refOpen    = false;
+let startTime  = null;
+let timerHandle= null;
+
+// Adaptive weighting: track errors per note
+const weights = {};
+NOTES.forEach(n => { weights[n.name] = 1; });
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const posY = pos => BY - pos * STEP;
+
+function ledgersFor(pos) {
+  const out = [];
+  if (pos <= -2) {
+    const lo = pos % 2 === 0 ? pos : pos + 1;
+    for (let p = -2; p >= lo; p -= 2) out.push(p);
+  }
+  if (pos >= 10) {
+    const hi = pos % 2 === 0 ? pos : pos - 1;
+    for (let p = 10; p <= hi; p += 2) out.push(p);
+  }
+  return out;
+}
+
+function el(tag, attrs, parent) {
+  const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k,v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+// ── Drawing ───────────────────────────────────────────────────────────────────
+function drawBassClef(svg) {
+  // Body from bass-clef-svgrepo-com.svg (source viewBox 0 0 512 512).
+  // Scale 0.165, translate(1,42): beak lands on F3 line (y=72), body spans y=42–127.
+  const g = el('g', { transform: 'translate(1,42) scale(0.165)' }, svg);
+  el('path', {
+    d: 'M176.014,0l-2.823,0.01C89.091,1.164,20.78,63.557,15.904,118.564'
+     + 'c-3.125,35.072,4.693,63.941,22.568,83.494'
+     + 'c16.307,17.803,39.765,26.836,69.727,26.836'
+     + 'c31.095,0,61.603-29.77,61.603-60.106'
+     + 'c0-30.803-25.076-55.869-55.888-55.869'
+     + 'c-16.569,0-27.575,7.323-34.858,12.179'
+     + 'c-2.853,1.892-5.796,3.854-7.121,3.854'
+     + 'c-0.446,0-1.477-1.184-2.458-5.635'
+     + 'c-3.399-15.335,1.902-33.644,14.212-48.98'
+     + 'c10.399-12.978,34.858-34.726,81.876-34.726'
+     + 'c65.67,0,101.833,52.894,101.833,148.952'
+     + 'c0,192.852-165.703,271.845-216.483,291.459'
+     + 'c-10.398,4.016-13.778,12.716-12.492,19.553'
+     + 'C39.828,507.002,45.947,512,53.686,512'
+     + 'c2.448,0,5.037-0.496,7.657-1.477l5.807-2.165'
+     + 'C262.916,435.82,362.19,326.247,362.19,182.648'
+     + 'C362.19,57.164,265.688,0,176.014,0z',
+    fill: '#111'
+  }, g);
+  // Dots: G3 space (y=66) and E3 space (y=78), x aligned with beak right edge
+  el('circle', { cx: 77, cy: 66, r: 7, fill: '#111' }, svg);
+  el('circle', { cx: 77, cy: 78, r: 7, fill: '#111' }, svg);
+}
+
+function drawStaffLines(svg, staffRight) {
+  // Lines start from x=4 so they run behind the clef symbol (authentic notation)
+  for (let i = 0; i <= 4; i++) {
+    el('line', {
+      x1: 4, y1: posY(i*2),
+      x2: staffRight, y2: posY(i*2),
+      stroke: '#444', 'stroke-width': 1.5
+    }, svg);
+  }
+}
+
+function drawNote(svg, pos, nx, noteR=10, color='#1a1a2e') {
+  const ny = posY(pos);
+
+  // Ledger lines
+  for (const lp of ledgersFor(pos)) {
+    el('line', {
+      x1: nx - LHW, y1: posY(lp),
+      x2: nx + LHW, y2: posY(lp),
+      stroke: '#444', 'stroke-width': 1.5
+    }, svg);
+  }
+
+  // Note head
+  el('ellipse', { cx: nx, cy: ny, rx: noteR, ry: noteR*0.7, fill: color }, svg);
+
+  // Stem (up if below middle D3, down if above)
+  const up = pos < 4;
+  const sx = up ? nx + noteR : nx - noteR;
+  el('line', {
+    x1: sx, y1: ny,
+    x2: sx, y2: up ? ny - 44 : ny + 44,
+    stroke: color, 'stroke-width': 2
+  }, svg);
+}
+
+function drawQuizStaff(pos) {
+  const svg = document.getElementById('staffSvg');
+  svg.innerHTML = '';
+  drawStaffLines(svg, SR);
+  drawBassClef(svg);
+  drawNote(svg, pos, NOTE_X);
+}
+
+function drawRefChart() {
+  const notes = activeNotes();
+  const count = notes.length;
+  const span  = SR - SL - 30;
+  const gap   = Math.max(20, Math.min(46, span / (count + 1)));
+  const startX = SL + gap;
+  const noteR  = Math.min(9, gap * 0.4);
+
+  // Height: staff + label space below + space above for high notes
+  const topNote  = notes.reduce((mn, n) => n.pos > mn ? n.pos : mn, 0);
+  const botNote  = notes.reduce((mx, n) => n.pos < mx ? n.pos : mx, 0);
+  const svgH     = Math.max(165, BY - botNote*STEP + 40);
+  const labelY   = BY - botNote*STEP + 25;
+
+  const refSvg = document.getElementById('refSvg');
+  refSvg.setAttribute('viewBox', `0 0 520 ${svgH}`);
+  refSvg.innerHTML = '';
+
+  drawStaffLines(refSvg, SR);
+  drawBassClef(refSvg);
+
+  notes.forEach((note, i) => {
+    const nx = startX + i * gap;
+    drawNote(refSvg, note.pos, nx, noteR, '#2a2a6a');
+
+    el('text', {
+      x: nx, y: labelY,
+      'text-anchor': 'middle',
+      'font-size': 10,
+      'font-family': 'system-ui, sans-serif',
+      fill: '#333', 'font-weight': 'bold'
+    }, refSvg).textContent = note.name;
+  });
+}
+
+// ── Timer ─────────────────────────────────────────────────────────────────────
+function startTimer() {
+  clearInterval(timerHandle);
+  startTime = Date.now();
+  const disp = document.getElementById('timerDisplay');
+  disp.textContent = '0.0s';
+  disp.className = 'timer-display';
+  timerHandle = setInterval(() => {
+    disp.textContent = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
+  }, 100);
+}
+
+function stopTimer() {
+  clearInterval(timerHandle);
+  timerHandle = null;
+  const elapsed = startTime ? (Date.now() - startTime) / 1000 : 0;
+  const disp = document.getElementById('timerDisplay');
+  disp.textContent = elapsed.toFixed(1) + 's';
+  disp.classList.add(elapsed <= 3 ? 'fast' : 'slow');
+  return elapsed.toFixed(1);
+}
+
+// ── Game logic ────────────────────────────────────────────────────────────────
+function activeNotes() {
+  const r = RANGES[range];
+  return NOTES.filter(n => n.pos >= r.min && n.pos <= r.max);
+}
+
+function pickNote() {
+  const pool = activeNotes();
+  const totalW = pool.reduce((s, n) => s + weights[n.name], 0);
+  let rand = Math.random() * totalW;
+  for (const n of pool) {
+    rand -= weights[n.name];
+    if (rand <= 0) return n;
+  }
+  return pool[pool.length - 1];
+}
+
+function nextNote() {
+  answered = false;
+  current  = pickNote();
+
+  document.getElementById('revealContent').innerHTML = '';
+  document.getElementById('nextBtn').classList.remove('show');
+  document.getElementById('hintText').textContent = 'Which note is this?';
+
+  document.querySelectorAll('.note-btn').forEach(b => {
+    b.classList.remove('correct','wrong');
+    b.disabled = false;
+  });
+
+  drawQuizStaff(current.pos);
+  startTimer();
+}
+
+function answer(letter, btn) {
+  if (answered) return;
+  answered = true;
+  total++;
+
+  const elapsed = stopTimer();
+  const correct = (letter === current.letter);
+
+  document.querySelectorAll('.note-btn').forEach(b => {
+    b.disabled = true;
+    if (b.dataset.l === current.letter) b.classList.add('correct');
+  });
+
+  if (correct) {
+    score++;
+    streak++;
+    weights[current.name] = Math.max(1, weights[current.name] * 0.8);
+    document.getElementById('revealContent').innerHTML =
+      `<span class="feedback-msg ok">✓ Correct! &nbsp;<strong>${current.name}</strong> &nbsp;·&nbsp; ${elapsed}s</span>`;
+  } else {
+    streak = 0;
+    btn.classList.add('wrong');
+    weights[current.name] = Math.min(10, weights[current.name] * 1.6);
+    document.getElementById('revealContent').innerHTML =
+      `<span class="feedback-msg bad">✗ That was &nbsp;<strong>${current.name}</strong> &nbsp;·&nbsp; ${elapsed}s</span>`;
+  }
+
+  document.getElementById('hintText').textContent = '';
+  document.getElementById('score').textContent    = score;
+  document.getElementById('streak').textContent   = streak;
+  document.getElementById('accuracy').textContent =
+    Math.round(score / total * 100) + '%';
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+// ── UI controls ───────────────────────────────────────────────────────────────
+function setRange(r, btnEl) {
+  range = r;
+  document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+  btnEl.classList.add('active');
+  nextNote();
+  if (refOpen) drawRefChart();
+}
+
+function toggleRef() {
+  refOpen = !refOpen;
+  document.getElementById('refPanel').classList.toggle('show', refOpen);
+  document.getElementById('refToggleBtn').textContent =
+    refOpen ? 'Hide Reference Chart' : 'Show Note Reference Chart';
+  if (refOpen) drawRefChart();
+}
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const key = e.key.toUpperCase();
+
+  if ('ABCDEFG'.includes(key) && key.length === 1) {
+    const btn = document.querySelector(`.note-btn[data-l="${key}"]`);
+    if (btn && !btn.disabled) { answer(key, btn); return; }
+  }
+
+  if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) {
+    const nb = document.getElementById('nextBtn');
+    if (nb.classList.contains('show')) { e.preventDefault(); nextNote(); }
+  }
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(function init() {
+  const grid = document.getElementById('buttonsGrid');
+  ['A','B','C','D','E','F','G'].forEach(letter => {
+    const btn = document.createElement('button');
+    btn.className   = 'note-btn';
+    btn.dataset.l   = letter;
+    btn.textContent = letter;
+    btn.onclick     = () => answer(letter, btn);
+    grid.appendChild(btn);
+  });
+  nextNote();
+})();
+</script>
+</body>
+</html>
