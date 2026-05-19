@@ -6,112 +6,70 @@
 <title>Sight Reading Trainer</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 body {
   font-family: system-ui, -apple-system, sans-serif;
-  background: #0d1117;
-  color: #e6edf3;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  gap: 14px;
+  background: #0d1117; color: #e6edf3;
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; padding: 20px; gap: 14px;
 }
-
 header { text-align: center; }
-
 h1 { font-size: 1.8rem; font-weight: 700; color: #58a6ff; }
 .tagline { color: #8b949e; font-size: 0.85rem; margin-top: 3px; }
 
 .stats {
-  display: flex;
-  gap: 24px;
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 12px;
-  padding: 12px 28px;
+  display: flex; gap: 24px; background: #161b22;
+  border: 1px solid #30363d; border-radius: 12px; padding: 12px 28px;
 }
 .stat { text-align: center; }
 .stat-label { font-size: 0.68rem; text-transform: uppercase; color: #8b949e; letter-spacing: .06em; }
 .stat-value { font-size: 1.6rem; font-weight: 700; color: #58a6ff; }
 #streak { color: #f78166; }
 
+.clef-selector {
+  display: flex; gap: 8px; width: 100%; max-width: 560px;
+}
+.clef-btn {
+  flex: 1; padding: 10px 6px;
+  border: 2px solid #21262d; background: #21262d; color: #8b949e;
+  border-radius: 8px; cursor: pointer; font-size: 0.82rem; font-weight: 700;
+  transition: all .15s; line-height: 1.3;
+}
+.clef-btn:hover { background: #2d333b; border-color: #58a6ff; }
+.clef-btn.active { border-color: #58a6ff; color: #58a6ff; background: #0e1f35; }
+
 .timer-display {
-  text-align: center;
-  font-size: 1.6rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: #8b949e;
-  margin-bottom: 10px;
-  letter-spacing: .02em;
-  transition: color .2s;
+  text-align: center; font-size: 1.6rem; font-weight: 700;
+  font-variant-numeric: tabular-nums; color: #8b949e;
+  margin-bottom: 10px; letter-spacing: .02em; transition: color .2s;
 }
 .timer-display.fast { color: #3fb950; }
 .timer-display.slow { color: #f78166; }
 
 .main-card {
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 16px;
-  padding: 22px;
-  width: 100%;
-  max-width: 560px;
+  background: #161b22; border: 1px solid #30363d;
+  border-radius: 16px; padding: 22px; width: 100%; max-width: 560px;
 }
-
 .staff-wrapper {
-  background: #fffef5;
-  border-radius: 10px;
-  padding: 6px 10px;
-  margin-bottom: 18px;
-  line-height: 0;
+  background: #fffef5; border-radius: 10px;
+  padding: 6px 10px; margin-bottom: 18px; line-height: 0;
 }
-
-#staffSvg {
-  width: 100%;
-  height: auto;
-  display: block;
-  max-width: 540px;
-  margin: 0 auto;
-}
+#staffSvg { width: 100%; height: auto; display: block; max-width: 540px; margin: 0 auto; }
 
 .reveal-area {
-  min-height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 10px;
+  min-height: 50px; display: flex;
+  align-items: center; justify-content: center; margin-bottom: 10px;
 }
-.note-revealed { font-size: 2.4rem; font-weight: 700; color: #58a6ff; }
 .feedback-msg { font-size: 1rem; font-weight: 600; }
 .feedback-msg.ok  { color: #3fb950; }
 .feedback-msg.bad { color: #f78166; }
 
-.hint {
-  text-align: center;
-  color: #8b949e;
-  font-size: 0.82rem;
-  margin-bottom: 12px;
-  min-height: 18px;
-}
+.hint { text-align: center; color: #8b949e; font-size: 0.82rem; margin-bottom: 12px; min-height: 18px; }
 
-.buttons-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 7px;
-  margin-bottom: 13px;
-}
+.buttons-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px; margin-bottom: 13px; }
 .note-btn {
-  padding: 15px 0;
-  border: 2px solid #21262d;
-  background: #21262d;
-  color: #e6edf3;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all .12s;
-  user-select: none;
+  padding: 15px 0; border: 2px solid #21262d; background: #21262d;
+  color: #e6edf3; border-radius: 8px; font-size: 1.1rem; font-weight: 700;
+  cursor: pointer; transition: all .12s; user-select: none;
 }
 .note-btn:hover:not(:disabled) { background: #2d333b; border-color: #58a6ff; }
 .note-btn:disabled { cursor: default; }
@@ -119,102 +77,48 @@ h1 { font-size: 1.8rem; font-weight: 700; color: #58a6ff; }
 .note-btn.wrong   { background: #3a1c1c; border-color: #f78166; color: #f78166; }
 
 .next-btn {
-  width: 100%;
-  padding: 13px;
-  background: #238636;
-  border: 1px solid #2ea043;
-  border-radius: 8px;
-  color: white;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background .15s;
-  display: none;
+  width: 100%; padding: 13px; background: #238636;
+  border: 1px solid #2ea043; border-radius: 8px; color: white;
+  font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background .15s; display: none;
 }
 .next-btn:hover { background: #2ea043; }
 .next-btn.show  { display: block; }
-
-.kbd-hint {
-  text-align: center;
-  font-size: 0.72rem;
-  color: #484f58;
-  margin-top: 9px;
-}
+.kbd-hint { text-align: center; font-size: 0.72rem; color: #484f58; margin-top: 9px; }
 
 .settings {
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 16px;
-  padding: 16px 22px;
-  width: 100%;
-  max-width: 560px;
+  background: #161b22; border: 1px solid #30363d;
+  border-radius: 16px; padding: 16px 22px; width: 100%; max-width: 560px;
 }
-.settings-title {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  color: #8b949e;
-  margin-bottom: 9px;
-}
+.settings-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: .06em; color: #8b949e; margin-bottom: 9px; }
 .range-btns { display: flex; gap: 7px; }
 .range-btn {
-  flex: 1;
-  padding: 10px 6px;
-  border: 2px solid #21262d;
-  background: #21262d;
-  color: #8b949e;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.78rem;
-  font-weight: 600;
-  line-height: 1.5;
-  transition: all .15s;
+  flex: 1; padding: 10px 6px; border: 2px solid #21262d; background: #21262d;
+  color: #8b949e; border-radius: 8px; cursor: pointer;
+  font-size: 0.78rem; font-weight: 600; line-height: 1.5; transition: all .15s;
 }
 .range-btn.active { border-color: #58a6ff; color: #58a6ff; background: #0e1f35; }
 
 .ref-toggle-row { text-align: center; margin-top: 11px; }
 .ref-btn {
-  background: none;
-  border: 1px solid #30363d;
-  color: #8b949e;
-  border-radius: 6px;
-  padding: 6px 16px;
-  cursor: pointer;
-  font-size: 0.78rem;
-  transition: all .15s;
+  background: none; border: 1px solid #30363d; color: #8b949e;
+  border-radius: 6px; padding: 6px 16px; cursor: pointer; font-size: 0.78rem; transition: all .15s;
 }
 .ref-btn:hover { border-color: #58a6ff; color: #58a6ff; }
 
 .ref-panel {
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 14px;
-  padding: 16px 20px;
-  width: 100%;
-  max-width: 560px;
-  display: none;
+  background: #161b22; border: 1px solid #30363d; border-radius: 14px;
+  padding: 16px 20px; width: 100%; max-width: 560px; display: none;
 }
 .ref-panel.show { display: block; }
-.ref-panel-title {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  color: #8b949e;
-  margin-bottom: 10px;
-}
-.ref-staff-wrap {
-  background: #fffef5;
-  border-radius: 8px;
-  padding: 6px 8px;
-  line-height: 0;
-  overflow-x: auto;
-}
+.ref-panel-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: .06em; color: #8b949e; margin-bottom: 10px; }
+.ref-staff-wrap { background: #fffef5; border-radius: 8px; padding: 6px 8px; line-height: 0; overflow-x: auto; }
 #refSvg { display: block; width: 100%; height: auto; }
 
 @media (max-width: 480px) {
   .note-btn { font-size: 0.95rem; padding: 12px 0; }
   .stats { gap: 14px; padding: 10px 16px; }
   .buttons-grid { gap: 4px; }
+  .clef-btn { font-size: 0.72rem; padding: 8px 4px; }
 }
 </style>
 </head>
@@ -226,47 +130,32 @@ h1 { font-size: 1.8rem; font-weight: 700; color: #58a6ff; }
 </header>
 
 <div class="stats">
-  <div class="stat">
-    <div class="stat-label">Score</div>
-    <div class="stat-value" id="score">0</div>
-  </div>
-  <div class="stat">
-    <div class="stat-label">Streak</div>
-    <div class="stat-value" id="streak">0</div>
-  </div>
-  <div class="stat">
-    <div class="stat-label">Accuracy</div>
-    <div class="stat-value" id="accuracy">—</div>
-  </div>
+  <div class="stat"><div class="stat-label">Score</div><div class="stat-value" id="score">0</div></div>
+  <div class="stat"><div class="stat-label">Streak</div><div class="stat-value" id="streak">0</div></div>
+  <div class="stat"><div class="stat-label">Accuracy</div><div class="stat-value" id="accuracy">—</div></div>
+</div>
+
+<div class="clef-selector" id="clefBtns">
+  <button class="clef-btn active" onclick="setClef('bass',this)">Bass</button>
+  <button class="clef-btn" onclick="setClef('treble',this)">Treble</button>
+  <button class="clef-btn" onclick="setClef('alto',this)">Alto</button>
+  <button class="clef-btn" onclick="setClef('tenor',this)">Tenor</button>
 </div>
 
 <div class="main-card">
   <div class="staff-wrapper">
     <svg id="staffSvg" viewBox="0 0 520 170" xmlns="http://www.w3.org/2000/svg"></svg>
   </div>
-
   <div class="timer-display" id="timerDisplay">0.0s</div>
-
-  <div class="reveal-area">
-    <div id="revealContent"></div>
-  </div>
-
+  <div class="reveal-area"><div id="revealContent"></div></div>
   <p class="hint" id="hintText"></p>
-
   <div class="buttons-grid" id="buttonsGrid"></div>
-
   <button class="next-btn" id="nextBtn" onclick="nextNote()">Next Note →</button>
-
   <p class="kbd-hint">Keyboard: press A–G to answer &nbsp;·&nbsp; Enter / Space for next</p>
 </div>
 
 <div class="settings">
-  <div class="settings-title">Clef</div>
-  <div class="range-btns" id="clefBtns">
-    <button class="range-btn active" onclick="setClef('bass',this)">Bass Clef</button>
-    <button class="range-btn" onclick="setClef('alto',this)">Alto Clef</button>
-  </div>
-  <div class="settings-title" style="margin-top:12px">Note Range</div>
+  <div class="settings-title">Note Range</div>
   <div class="range-btns" id="rangeBtns">
     <button class="range-btn active" id="rangeBtn-beginner" onclick="setRange('beginner',this)">Beginner<br><span id="rangeLabel-beginner">G2 – A3</span></button>
     <button class="range-btn" id="rangeBtn-intermediate" onclick="setRange('intermediate',this)">Intermediate<br><span id="rangeLabel-intermediate">E2 – C4</span></button>
@@ -285,146 +174,138 @@ h1 { font-size: 1.8rem; font-weight: 700; color: #58a6ff; }
 </div>
 
 <script>
-// ── Bass clef note definitions ─────────────────────────────────────────────────
-// pos: staff position where 0 = bottom line; each step = one note
+// ── Note definitions ───────────────────────────────────────────────────────────
+// pos: staff position, 0 = bottom line; staff lines at even positions 0,2,4,6,8
+
 const NOTES = [
-  { name:'C2', letter:'C', pos:-4 },
-  { name:'D2', letter:'D', pos:-3 },
-  { name:'E2', letter:'E', pos:-2 },
-  { name:'F2', letter:'F', pos:-1 },
-  { name:'G2', letter:'G', pos: 0 },
-  { name:'A2', letter:'A', pos: 1 },
-  { name:'B2', letter:'B', pos: 2 },
-  { name:'C3', letter:'C', pos: 3 },
-  { name:'D3', letter:'D', pos: 4 },
-  { name:'E3', letter:'E', pos: 5 },
-  { name:'F3', letter:'F', pos: 6 },
-  { name:'G3', letter:'G', pos: 7 },
-  { name:'A3', letter:'A', pos: 8 },
-  { name:'B3', letter:'B', pos: 9 },
-  { name:'C4', letter:'C', pos:10 },
-  { name:'D4', letter:'D', pos:11 },
+  {name:'C2',letter:'C',pos:-4},{name:'D2',letter:'D',pos:-3},{name:'E2',letter:'E',pos:-2},
+  {name:'F2',letter:'F',pos:-1},{name:'G2',letter:'G',pos: 0},{name:'A2',letter:'A',pos: 1},
+  {name:'B2',letter:'B',pos: 2},{name:'C3',letter:'C',pos: 3},{name:'D3',letter:'D',pos: 4},
+  {name:'E3',letter:'E',pos: 5},{name:'F3',letter:'F',pos: 6},{name:'G3',letter:'G',pos: 7},
+  {name:'A3',letter:'A',pos: 8},{name:'B3',letter:'B',pos: 9},{name:'C4',letter:'C',pos:10},
+  {name:'D4',letter:'D',pos:11},
 ];
+const RANGES = { beginner:{min:0,max:8}, intermediate:{min:-2,max:10}, advanced:{min:-4,max:11} };
 
-const RANGES = {
-  beginner:     { min: 0,  max: 8  },
-  intermediate: { min:-2,  max:10  },
-  advanced:     { min:-4,  max:11  },
-};
-
-// ── Alto clef note definitions ─────────────────────────────────────────────────
-// pos: same formula; bottom line = F3 (pos 0), middle (3rd) line = C4 (pos 4)
+// Alto clef: bottom line=F3, middle line=C4 (pos 4)
 const ALTO_NOTES = [
-  { name:'B2', letter:'B', pos:-4 },
-  { name:'C3', letter:'C', pos:-3 },
-  { name:'D3', letter:'D', pos:-2 },
-  { name:'E3', letter:'E', pos:-1 },
-  { name:'F3', letter:'F', pos: 0 },
-  { name:'G3', letter:'G', pos: 1 },
-  { name:'A3', letter:'A', pos: 2 },
-  { name:'B3', letter:'B', pos: 3 },
-  { name:'C4', letter:'C', pos: 4 },
-  { name:'D4', letter:'D', pos: 5 },
-  { name:'E4', letter:'E', pos: 6 },
-  { name:'F4', letter:'F', pos: 7 },
-  { name:'G4', letter:'G', pos: 8 },
-  { name:'A4', letter:'A', pos: 9 },
-  { name:'B4', letter:'B', pos:10 },
-  { name:'C5', letter:'C', pos:11 },
+  {name:'B2',letter:'B',pos:-4},{name:'C3',letter:'C',pos:-3},{name:'D3',letter:'D',pos:-2},
+  {name:'E3',letter:'E',pos:-1},{name:'F3',letter:'F',pos: 0},{name:'G3',letter:'G',pos: 1},
+  {name:'A3',letter:'A',pos: 2},{name:'B3',letter:'B',pos: 3},{name:'C4',letter:'C',pos: 4},
+  {name:'D4',letter:'D',pos: 5},{name:'E4',letter:'E',pos: 6},{name:'F4',letter:'F',pos: 7},
+  {name:'G4',letter:'G',pos: 8},{name:'A4',letter:'A',pos: 9},{name:'B4',letter:'B',pos:10},
+  {name:'C5',letter:'C',pos:11},
 ];
+const ALTO_RANGES = { beginner:{min:0,max:8}, intermediate:{min:-2,max:10}, advanced:{min:-4,max:11} };
 
-const ALTO_RANGES = {
-  beginner:     { min: 0,  max: 8  },
-  intermediate: { min:-2,  max:10  },
-  advanced:     { min:-4,  max:11  },
-};
+// Treble clef: bottom line=E4, G4 on 2nd line (pos 2)
+const TREBLE_NOTES = [
+  {name:'A3',letter:'A',pos:-4},{name:'B3',letter:'B',pos:-3},{name:'C4',letter:'C',pos:-2},
+  {name:'D4',letter:'D',pos:-1},{name:'E4',letter:'E',pos: 0},{name:'F4',letter:'F',pos: 1},
+  {name:'G4',letter:'G',pos: 2},{name:'A4',letter:'A',pos: 3},{name:'B4',letter:'B',pos: 4},
+  {name:'C5',letter:'C',pos: 5},{name:'D5',letter:'D',pos: 6},{name:'E5',letter:'E',pos: 7},
+  {name:'F5',letter:'F',pos: 8},{name:'G5',letter:'G',pos: 9},{name:'A5',letter:'A',pos:10},
+  {name:'B5',letter:'B',pos:11},
+];
+const TREBLE_RANGES = { beginner:{min:0,max:8}, intermediate:{min:-2,max:10}, advanced:{min:-4,max:11} };
+
+// Tenor clef: bottom line=D3, C4 on 4th line (pos 6)
+const TENOR_NOTES = [
+  {name:'G2',letter:'G',pos:-4},{name:'A2',letter:'A',pos:-3},{name:'B2',letter:'B',pos:-2},
+  {name:'C3',letter:'C',pos:-1},{name:'D3',letter:'D',pos: 0},{name:'E3',letter:'E',pos: 1},
+  {name:'F3',letter:'F',pos: 2},{name:'G3',letter:'G',pos: 3},{name:'A3',letter:'A',pos: 4},
+  {name:'B3',letter:'B',pos: 5},{name:'C4',letter:'C',pos: 6},{name:'D4',letter:'D',pos: 7},
+  {name:'E4',letter:'E',pos: 8},{name:'F4',letter:'F',pos: 9},{name:'G4',letter:'G',pos:10},
+  {name:'A4',letter:'A',pos:11},
+];
+const TENOR_RANGES = { beginner:{min:0,max:8}, intermediate:{min:-2,max:10}, advanced:{min:-4,max:11} };
 
 const RANGE_LABELS = {
-  bass: { beginner:'G2 – A3', intermediate:'E2 – C4', advanced:'C2 – D4' },
-  alto: { beginner:'F3 – G4', intermediate:'D3 – B4', advanced:'B2 – C5' },
+  bass:   { beginner:'G2 – A3', intermediate:'E2 – C4', advanced:'C2 – D4' },
+  alto:   { beginner:'F3 – G4', intermediate:'D3 – B4', advanced:'B2 – C5' },
+  treble: { beginner:'E4 – F5', intermediate:'C4 – A5', advanced:'A3 – B5' },
+  tenor:  { beginner:'D3 – E4', intermediate:'B2 – G4', advanced:'G2 – A4' },
 };
 
+const CLEF_NOTES  = { bass:NOTES,        alto:ALTO_NOTES,  treble:TREBLE_NOTES,  tenor:TENOR_NOTES  };
+const CLEF_RANGES = { bass:RANGES,       alto:ALTO_RANGES, treble:TREBLE_RANGES, tenor:TENOR_RANGES };
+
 // ── SVG layout constants ───────────────────────────────────────────────────────
-const BY      = 108;   // y of pos=0 (bottom line)
-const STEP    = 6;     // px per note step
-const SL      = 90;    // staff left x
-const SR      = 480;   // staff right x
-const NOTE_X  = 290;   // x of quiz note head
-const LHW     = 20;    // ledger line half-width
+const BY=108, STEP=6, SL=90, SR=480, NOTE_X=290, LHW=20;
 
 // ── State ─────────────────────────────────────────────────────────────────────
-let clef       = 'bass';
-let range      = 'beginner';
-let current    = null;
-let answered   = false;
-let score      = 0;
-let streak     = 0;
-let total      = 0;
-let refOpen    = false;
-let startTime  = null;
-let timerHandle= null;
+let clef='bass', range='beginner', current=null, answered=false;
+let score=0, streak=0, total=0, refOpen=false, startTime=null, timerHandle=null;
 
-// Adaptive weighting: track errors per note name (shared across clefs)
 const weights = {};
-[...NOTES, ...ALTO_NOTES].forEach(n => { if (!weights[n.name]) weights[n.name] = 1; });
+[...NOTES,...ALTO_NOTES,...TREBLE_NOTES,...TENOR_NOTES].forEach(n => { if(!weights[n.name]) weights[n.name]=1; });
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const posY = pos => BY - pos * STEP;
 
 function ledgersFor(pos) {
   const out = [];
-  if (pos <= -2) {
-    const lo = pos % 2 === 0 ? pos : pos + 1;
-    for (let p = -2; p >= lo; p -= 2) out.push(p);
-  }
-  if (pos >= 10) {
-    const hi = pos % 2 === 0 ? pos : pos - 1;
-    for (let p = 10; p <= hi; p += 2) out.push(p);
-  }
+  if (pos <= -2) { const lo = pos%2===0 ? pos : pos+1; for(let p=-2; p>=lo; p-=2) out.push(p); }
+  if (pos >= 10) { const hi = pos%2===0 ? pos : pos-1; for(let p=10; p<=hi; p+=2) out.push(p); }
   return out;
 }
 
 function el(tag, attrs, parent) {
   const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
-  for (const [k,v] of Object.entries(attrs)) e.setAttribute(k, v);
+  for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,v);
   if (parent) parent.appendChild(e);
   return e;
 }
 
-// ── Drawing ───────────────────────────────────────────────────────────────────
+// ── Clef drawing ──────────────────────────────────────────────────────────────
 function drawBassClef(svg) {
-  // Body from bass-clef-svgrepo-com.svg (source viewBox 0 0 512 512).
-  // Scale 0.165, translate(1,42): beak lands on F3 line (y=72), body spans y=42–127.
-  const g = el('g', { transform: 'translate(1,42) scale(0.165)' }, svg);
+  const g = el('g', {transform:'translate(1,42) scale(0.165)'}, svg);
   el('path', {
     d: 'M176.014,0l-2.823,0.01C89.091,1.164,20.78,63.557,15.904,118.564'
-     + 'c-3.125,35.072,4.693,63.941,22.568,83.494'
-     + 'c16.307,17.803,39.765,26.836,69.727,26.836'
-     + 'c31.095,0,61.603-29.77,61.603-60.106'
-     + 'c0-30.803-25.076-55.869-55.888-55.869'
-     + 'c-16.569,0-27.575,7.323-34.858,12.179'
-     + 'c-2.853,1.892-5.796,3.854-7.121,3.854'
-     + 'c-0.446,0-1.477-1.184-2.458-5.635'
-     + 'c-3.399-15.335,1.902-33.644,14.212-48.98'
-     + 'c10.399-12.978,34.858-34.726,81.876-34.726'
-     + 'c65.67,0,101.833,52.894,101.833,148.952'
-     + 'c0,192.852-165.703,271.845-216.483,291.459'
-     + 'c-10.398,4.016-13.778,12.716-12.492,19.553'
-     + 'C39.828,507.002,45.947,512,53.686,512'
-     + 'c2.448,0,5.037-0.496,7.657-1.477l5.807-2.165'
-     + 'C262.916,435.82,362.19,326.247,362.19,182.648'
-     + 'C362.19,57.164,265.688,0,176.014,0z',
-    fill: '#111'
+     + 'c-3.125,35.072,4.693,63.941,22.568,83.494c16.307,17.803,39.765,26.836,69.727,26.836'
+     + 'c31.095,0,61.603-29.77,61.603-60.106c0-30.803-25.076-55.869-55.888-55.869'
+     + 'c-16.569,0-27.575,7.323-34.858,12.179c-2.853,1.892-5.796,3.854-7.121,3.854'
+     + 'c-0.446,0-1.477-1.184-2.458-5.635c-3.399-15.335,1.902-33.644,14.212-48.98'
+     + 'c10.399-12.978,34.858-34.726,81.876-34.726c65.67,0,101.833,52.894,101.833,148.952'
+     + 'c0,192.852-165.703,271.845-216.483,291.459c-10.398,4.016-13.778,12.716-12.492,19.553'
+     + 'C39.828,507.002,45.947,512,53.686,512c2.448,0,5.037-0.496,7.657-1.477l5.807-2.165'
+     + 'C262.916,435.82,362.19,326.247,362.19,182.648C362.19,57.164,265.688,0,176.014,0z',
+    fill:'#111'
   }, g);
-  // Two dots alongside the beak: above and below F3 line
-  el('circle', { cx: 77, cy: 66, r: 7, fill: '#111' }, svg);
-  el('circle', { cx: 77, cy: 78, r: 7, fill: '#111' }, svg);
+  el('circle', {cx:77, cy:66, r:7, fill:'#111'}, svg);
+  el('circle', {cx:77, cy:78, r:7, fill:'#111'}, svg);
+}
+
+function drawTrebleClef(svg) {
+  // Source viewBox 0 0 95.116 153.12; G4 (~y=100 src) → posY(2)=96; scale 0.6
+  const g = el('g', {transform:'translate(-5,36) scale(0.6)'}, svg);
+  el('path', {
+    d: 'm51.688 5.25c-5.427-0.1409-11.774 12.818-11.563 24.375 0.049 3.52 1.16 10.659 2.781 19.625'
+     + '-10.223 10.581-22.094 21.44-22.094 35.688-0.163 13.057 7.817 29.692 26.75 29.532'
+     + ' 2.906-0.02 5.521-0.38 7.844-1 1.731 9.49 2.882 16.98 2.875 20.44'
+     + ' 0.061 13.64-17.86 14.99-18.719 7.15 3.777-0.13 6.782-3.13 6.782-6.84'
+     + ' 0-3.79-3.138-6.88-7.032-6.88-2.141 0-4.049 0.94-5.343 2.41'
+     + '-0.03 0.03-0.065 0.06-0.094 0.09-0.292 0.31-0.538 0.68-0.781 1.1'
+     + '-0.798 1.35-1.316 3.29-1.344 6.06 0 11.42 28.875 18.77 28.875-3.75'
+     + ' 0.045-3.03-1.258-10.72-3.156-20.41 20.603-7.45 15.427-38.04-3.531-38.184'
+     + '-1.47 0.015-2.887 0.186-4.25 0.532-1.08-5.197-2.122-10.241-3.032-14.876'
+     + ' 7.199-7.071 13.485-16.224 13.344-33.093 0.022-12.114-4.014-21.828-8.312-21.969z'
+     + 'm1.281 11.719c2.456-0.237 4.406 2.043 4.406 7.062'
+     + ' 0.199 8.62-5.84 16.148-13.031 23.719-0.688-4.147-1.139-7.507-1.188-9.5'
+     + ' 0.204-13.466 5.719-20.886 9.813-21.281z'
+     + 'm-7.719 44.687c0.877 4.515 1.824 9.272 2.781 14.063'
+     + '-12.548 4.464-18.57 21.954-0.781 29.781-10.843-9.231-5.506-20.158 2.312-22.062'
+     + ' 1.966 9.816 3.886 19.502 5.438 27.872-2.107 0.74-4.566 1.17-7.438 1.19'
+     + '-7.181 0-21.531-4.57-21.531-21.875 0-14.494 10.047-20.384 19.219-28.969z'
+     + 'm6.094 21.469c0.313-0.019 0.652-0.011 0.968 0'
+     + ' 13.063 0 17.99 20.745 4.688 27.375-1.655-8.32-3.662-17.86-5.656-27.375z',
+    fill:'#111', stroke:'none'
+  }, g);
 }
 
 function drawAltoClef(svg) {
-  // Path from alto_Clef.svg (path19). Source viewBox spans x 4752–6284, y 5217–7579.
-  // Scale = 48px / 2362 source units = 0.0203. Translate maps source origin to staff coords.
-  const g = el('g', { transform: 'translate(-92.6,-46) scale(0.0203)' }, svg);
+  // Source coords x 4752–6284, y 5217–7579; scale=48/2362=0.0203; C4 on 3rd line (pos 4)
+  const g = el('g', {transform:'translate(-92.6,-46) scale(0.0203)'}, svg);
   el('path', {
     d: 'M 4752,7579 L 4752,5273 L 4752,5222 L 5018,5222 L 5018,7528 L 5018,7579 L 4752,7579 z'
      + ' M 5152,7579 L 5152,5273 L 5152,5222 L 5237,5222 L 5237,6377'
@@ -460,82 +341,101 @@ function drawAltoClef(svg) {
      + ' C 5559,6786 5532,6865 5520,6956 C 5507,6879 5487,6805 5458,6734'
      + ' C 5429,6662 5396,6599 5357,6545 C 5320,6492 5279,6449 5237,6419'
      + ' L 5237,7579 L 5152,7579 z',
-    fill: '#111'
+    fill:'#111'
   }, g);
 }
 
+function drawTenorClef(svg) {
+  // Source staff lines at y=3700,4901,6102,7302,8503 (spacing 1201); C4 on 4th line (pos 6)
+  // scale=12/1201≈0.01; posY(6)=72; source C4 line y=4901 → 4901*0.01+ty=72 → ty=23
+  const g = el('g', {transform:'translate(-35.7,23) scale(0.01)'}, svg);
+  el('path', {
+    d: 'M 3973,7302 L 3973,2612 L 3973,2509 L 4515,2509 L 4515,7199 L 4515,7302 L 3973,7302 z'
+     + ' M 4788,7302 L 4788,2612 L 4788,2509 L 4960,2509 L 4960,4859'
+     + ' C 5047,4814 5134,4721 5221,4578 C 5308,4436 5381,4284 5438,4124'
+     + ' C 5496,3964 5527,3846 5530,3768 C 5557,3939 5600,4075 5657,4178'
+     + ' C 5715,4281 5780,4354 5852,4398 C 5925,4442 5998,4464 6072,4464'
+     + ' C 6252,4464 6368,4382 6416,4216 C 6465,4052 6489,3850 6489,3614'
+     + ' C 6489,3506 6487,3409 6481,3323 C 6476,3236 6463,3149 6441,3062'
+     + ' C 6420,2974 6385,2895 6335,2826 C 6285,2757 6219,2709 6137,2683'
+     + ' C 6064,2664 5991,2654 5919,2654 C 5854,2654 5800,2666 5756,2689'
+     + ' C 5713,2712 5688,2745 5683,2786 C 5693,2822 5719,2865 5761,2915'
+     + ' C 5804,2965 5833,3003 5849,3027 C 5865,3052 5873,3088 5873,3134'
+     + ' C 5873,3216 5844,3286 5787,3344 C 5730,3401 5654,3430 5558,3430'
+     + ' C 5464,3430 5388,3396 5331,3328 C 5274,3260 5243,3179 5238,3087'
+     + ' C 5247,2962 5292,2856 5372,2766 C 5453,2678 5554,2611 5673,2567'
+     + ' C 5794,2522 5914,2499 6036,2499 C 6174,2499 6307,2524 6435,2573'
+     + ' C 6562,2622 6676,2694 6775,2788 C 6875,2883 6954,3000 7011,3137'
+     + ' C 7068,3274 7097,3430 7097,3603 C 7097,3843 7053,4042 6964,4200'
+     + ' C 6875,4358 6761,4475 6622,4549 C 6482,4623 6333,4662 6174,4666'
+     + ' C 6012,4657 5876,4620 5766,4558 L 5550,4906 L 5766,5253'
+     + ' C 5917,5193 6063,5163 6206,5163 C 6387,5163 6544,5215 6680,5318'
+     + ' C 6816,5420 6920,5554 6990,5718 C 7061,5882 7097,6051 7097,6226'
+     + ' C 7097,6418 7054,6596 6969,6760 C 6883,6925 6763,7057 6607,7155'
+     + ' C 6451,7253 6273,7302 6072,7302 C 5837,7292 5641,7237 5483,7136'
+     + ' C 5327,7035 5248,6885 5248,6687 C 5258,6593 5293,6518 5354,6464'
+     + ' C 5414,6408 5479,6378 5550,6373 C 5637,6373 5714,6403 5781,6464'
+     + ' C 5849,6524 5883,6598 5883,6688 C 5883,6723 5875,6755 5859,6785'
+     + ' C 5843,6814 5819,6849 5787,6888 C 5754,6927 5732,6956 5720,6975'
+     + ' C 5707,6994 5698,7017 5693,7046 C 5693,7082 5716,7112 5762,7137'
+     + ' C 5808,7161 5867,7176 5938,7181 C 6163,7171 6312,7077 6386,6898'
+     + ' C 6461,6719 6498,6496 6498,6227 C 6498,5993 6471,5788 6419,5611'
+     + ' C 6365,5435 6249,5347 6072,5347 C 5913,5347 5790,5416 5703,5553'
+     + ' C 5618,5689 5563,5849 5539,6034 C 5513,5879 5470,5729 5411,5583'
+     + ' C 5353,5437 5285,5310 5207,5200 C 5130,5091 5047,5005 4960,4943'
+     + ' L 4960,7302 L 4788,7302 z',
+    fill:'#111'
+  }, g);
+}
+
+const CLEF_DRAW = { bass:drawBassClef, treble:drawTrebleClef, alto:drawAltoClef, tenor:drawTenorClef };
+
+// ── Staff ─────────────────────────────────────────────────────────────────────
 function drawStaffLines(svg, staffRight) {
-  for (let i = 0; i <= 4; i++) {
-    el('line', {
-      x1: 4, y1: posY(i*2),
-      x2: staffRight, y2: posY(i*2),
-      stroke: '#444', 'stroke-width': 1.5
-    }, svg);
+  for (let i=0; i<=4; i++) {
+    el('line', {x1:4, y1:posY(i*2), x2:staffRight, y2:posY(i*2), stroke:'#444', 'stroke-width':1.5}, svg);
   }
 }
 
 function drawNote(svg, pos, nx, noteR=10, color='#1a1a2e') {
   const ny = posY(pos);
-
   for (const lp of ledgersFor(pos)) {
-    el('line', {
-      x1: nx - LHW, y1: posY(lp),
-      x2: nx + LHW, y2: posY(lp),
-      stroke: '#444', 'stroke-width': 1.5
-    }, svg);
+    el('line', {x1:nx-LHW, y1:posY(lp), x2:nx+LHW, y2:posY(lp), stroke:'#444', 'stroke-width':1.5}, svg);
   }
-
-  el('ellipse', { cx: nx, cy: ny, rx: noteR, ry: noteR*0.7, fill: color }, svg);
-
+  el('ellipse', {cx:nx, cy:ny, rx:noteR, ry:noteR*0.7, fill:color}, svg);
   const up = pos < 4;
-  const sx = up ? nx + noteR : nx - noteR;
-  el('line', {
-    x1: sx, y1: ny,
-    x2: sx, y2: up ? ny - 44 : ny + 44,
-    stroke: color, 'stroke-width': 2
-  }, svg);
+  const sx = up ? nx+noteR : nx-noteR;
+  el('line', {x1:sx, y1:ny, x2:sx, y2:up ? ny-44 : ny+44, stroke:color, 'stroke-width':2}, svg);
 }
 
 function drawQuizStaff(pos) {
   const svg = document.getElementById('staffSvg');
   svg.innerHTML = '';
   drawStaffLines(svg, SR);
-  if (clef === 'alto') drawAltoClef(svg);
-  else drawBassClef(svg);
+  CLEF_DRAW[clef](svg);
   drawNote(svg, pos, NOTE_X);
 }
 
 function drawRefChart() {
   const notes = activeNotes();
-  const count = notes.length;
-  const span  = SR - SL - 30;
-  const gap   = Math.max(20, Math.min(46, span / (count + 1)));
+  const gap   = Math.max(20, Math.min(46, (SR-SL-30) / (notes.length+1)));
   const startX = SL + gap;
-  const noteR  = Math.min(9, gap * 0.4);
-
-  const topNote = notes.reduce((mn, n) => n.pos > mn ? n.pos : mn, 0);
-  const botNote = notes.reduce((mx, n) => n.pos < mx ? n.pos : mx, 0);
-  const svgH    = Math.max(165, BY - botNote*STEP + 40);
-  const labelY  = BY - botNote*STEP + 25;
+  const noteR  = Math.min(9, gap*0.4);
+  const botNote = notes.reduce((mn,n) => n.pos<mn ? n.pos : mn, 0);
+  const svgH   = Math.max(165, BY - botNote*STEP + 40);
+  const labelY = BY - botNote*STEP + 25;
 
   const refSvg = document.getElementById('refSvg');
   refSvg.setAttribute('viewBox', `0 0 520 ${svgH}`);
   refSvg.innerHTML = '';
-
   drawStaffLines(refSvg, SR);
-  if (clef === 'alto') drawAltoClef(refSvg);
-  else drawBassClef(refSvg);
+  CLEF_DRAW[clef](refSvg);
 
-  notes.forEach((note, i) => {
-    const nx = startX + i * gap;
+  notes.forEach((note,i) => {
+    const nx = startX + i*gap;
     drawNote(refSvg, note.pos, nx, noteR, '#2a2a6a');
-    el('text', {
-      x: nx, y: labelY,
-      'text-anchor': 'middle',
-      'font-size': 10,
-      'font-family': 'system-ui, sans-serif',
-      fill: '#333', 'font-weight': 'bold'
-    }, refSvg).textContent = note.name;
+    el('text', {x:nx, y:labelY, 'text-anchor':'middle', 'font-size':10,
+      'font-family':'system-ui,sans-serif', fill:'#333', 'font-weight':'bold'}, refSvg).textContent = note.name;
   });
 }
 
@@ -544,101 +444,79 @@ function startTimer() {
   clearInterval(timerHandle);
   startTime = Date.now();
   const disp = document.getElementById('timerDisplay');
-  disp.textContent = '0.0s';
-  disp.className = 'timer-display';
+  disp.textContent = '0.0s'; disp.className = 'timer-display';
   timerHandle = setInterval(() => {
-    disp.textContent = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
+    disp.textContent = ((Date.now()-startTime)/1000).toFixed(1)+'s';
   }, 100);
 }
 
 function stopTimer() {
-  clearInterval(timerHandle);
-  timerHandle = null;
-  const elapsed = startTime ? (Date.now() - startTime) / 1000 : 0;
+  clearInterval(timerHandle); timerHandle = null;
+  const elapsed = startTime ? (Date.now()-startTime)/1000 : 0;
   const disp = document.getElementById('timerDisplay');
-  disp.textContent = elapsed.toFixed(1) + 's';
-  disp.classList.add(elapsed <= 3 ? 'fast' : 'slow');
+  disp.textContent = elapsed.toFixed(1)+'s';
+  disp.classList.add(elapsed<=3 ? 'fast' : 'slow');
   return elapsed.toFixed(1);
 }
 
 // ── Game logic ────────────────────────────────────────────────────────────────
 function activeNotes() {
-  const notes  = clef === 'alto' ? ALTO_NOTES : NOTES;
-  const ranges = clef === 'alto' ? ALTO_RANGES : RANGES;
-  const r = ranges[range];
-  return notes.filter(n => n.pos >= r.min && n.pos <= r.max);
+  const r = CLEF_RANGES[clef][range];
+  return CLEF_NOTES[clef].filter(n => n.pos>=r.min && n.pos<=r.max);
 }
 
 function pickNote() {
   const pool = activeNotes();
-  const totalW = pool.reduce((s, n) => s + weights[n.name], 0);
+  const totalW = pool.reduce((s,n) => s+weights[n.name], 0);
   let rand = Math.random() * totalW;
-  for (const n of pool) {
-    rand -= weights[n.name];
-    if (rand <= 0) return n;
-  }
-  return pool[pool.length - 1];
+  for (const n of pool) { rand -= weights[n.name]; if (rand<=0) return n; }
+  return pool[pool.length-1];
 }
 
 function nextNote() {
-  answered = false;
-  current  = pickNote();
-
+  answered = false; current = pickNote();
   document.getElementById('revealContent').innerHTML = '';
   document.getElementById('nextBtn').classList.remove('show');
   document.getElementById('hintText').textContent = 'Which note is this?';
-
-  document.querySelectorAll('.note-btn').forEach(b => {
-    b.classList.remove('correct','wrong');
-    b.disabled = false;
-  });
-
+  document.querySelectorAll('.note-btn').forEach(b => { b.classList.remove('correct','wrong'); b.disabled=false; });
   drawQuizStaff(current.pos);
   startTimer();
 }
 
 function answer(letter, btn) {
   if (answered) return;
-  answered = true;
-  total++;
-
+  answered = true; total++;
   const elapsed = stopTimer();
-  const correct = (letter === current.letter);
-
+  const correct = letter === current.letter;
   document.querySelectorAll('.note-btn').forEach(b => {
     b.disabled = true;
     if (b.dataset.l === current.letter) b.classList.add('correct');
   });
-
   if (correct) {
-    score++;
-    streak++;
-    weights[current.name] = Math.max(1, weights[current.name] * 0.8);
+    score++; streak++;
+    weights[current.name] = Math.max(1, weights[current.name]*0.8);
     document.getElementById('revealContent').innerHTML =
       `<span class="feedback-msg ok">✓ Correct! &nbsp;<strong>${current.name}</strong> &nbsp;·&nbsp; ${elapsed}s</span>`;
   } else {
-    streak = 0;
-    btn.classList.add('wrong');
-    weights[current.name] = Math.min(10, weights[current.name] * 1.6);
+    streak = 0; btn.classList.add('wrong');
+    weights[current.name] = Math.min(10, weights[current.name]*1.6);
     document.getElementById('revealContent').innerHTML =
       `<span class="feedback-msg bad">✗ That was &nbsp;<strong>${current.name}</strong> &nbsp;·&nbsp; ${elapsed}s</span>`;
   }
-
   document.getElementById('hintText').textContent = '';
   document.getElementById('score').textContent    = score;
   document.getElementById('streak').textContent   = streak;
-  document.getElementById('accuracy').textContent =
-    Math.round(score / total * 100) + '%';
+  document.getElementById('accuracy').textContent = Math.round(score/total*100)+'%';
   document.getElementById('nextBtn').classList.add('show');
 }
 
 // ── UI controls ───────────────────────────────────────────────────────────────
 function setClef(c, btnEl) {
   clef = c;
-  document.querySelectorAll('#clefBtns .range-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#clefBtns .clef-btn').forEach(b => b.classList.remove('active'));
   btnEl.classList.add('active');
   ['beginner','intermediate','advanced'].forEach(r => {
-    document.getElementById('rangeLabel-' + r).textContent = RANGE_LABELS[c][r];
+    document.getElementById('rangeLabel-'+r).textContent = RANGE_LABELS[c][r];
   });
   range = 'beginner';
   document.querySelectorAll('#rangeBtns .range-btn').forEach(b => b.classList.remove('active'));
@@ -658,8 +536,7 @@ function setRange(r, btnEl) {
 function toggleRef() {
   refOpen = !refOpen;
   document.getElementById('refPanel').classList.toggle('show', refOpen);
-  document.getElementById('refToggleBtn').textContent =
-    refOpen ? 'Hide Reference Chart' : 'Show Note Reference Chart';
+  document.getElementById('refToggleBtn').textContent = refOpen ? 'Hide Reference Chart' : 'Show Note Reference Chart';
   if (refOpen) drawRefChart();
 }
 
@@ -667,13 +544,11 @@ function toggleRef() {
 document.addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   const key = e.key.toUpperCase();
-
-  if ('ABCDEFG'.includes(key) && key.length === 1) {
+  if ('ABCDEFG'.includes(key) && key.length===1) {
     const btn = document.querySelector(`.note-btn[data-l="${key}"]`);
     if (btn && !btn.disabled) { answer(key, btn); return; }
   }
-
-  if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) {
+  if ((e.key==='Enter' || e.key===' ') && !e.repeat) {
     const nb = document.getElementById('nextBtn');
     if (nb.classList.contains('show')) { e.preventDefault(); nextNote(); }
   }
@@ -684,10 +559,8 @@ document.addEventListener('keydown', e => {
   const grid = document.getElementById('buttonsGrid');
   ['A','B','C','D','E','F','G'].forEach(letter => {
     const btn = document.createElement('button');
-    btn.className   = 'note-btn';
-    btn.dataset.l   = letter;
-    btn.textContent = letter;
-    btn.onclick     = () => answer(letter, btn);
+    btn.className='note-btn'; btn.dataset.l=letter; btn.textContent=letter;
+    btn.onclick = () => answer(letter, btn);
     grid.appendChild(btn);
   });
   nextNote();
