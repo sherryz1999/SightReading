@@ -74,13 +74,20 @@ h1 { font-size: 1.8rem; font-weight: 700; color: #58a6ff; }
 .note-btn.correct { background: #1c3a25; border-color: #3fb950; color: #3fb950; }
 .note-btn.wrong   { background: #3a1c1c; border-color: #f78166; color: #f78166; }
 
+.next-row { display: flex; gap: 8px; }
 .next-btn {
-  width: 100%; padding: 13px; background: #238636;
+  flex: 1; padding: 13px; background: #238636;
   border: 1px solid #2ea043; border-radius: 8px; color: white;
   font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background .15s; display: none;
 }
 .next-btn:hover { background: #2ea043; }
 .next-btn.show  { display: block; }
+.replay-btn {
+  padding: 13px 18px; background: #1c2b3a;
+  border: 1px solid #58a6ff; border-radius: 8px; color: #58a6ff;
+  font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background .15s;
+}
+.replay-btn:hover { background: #0e1f35; }
 .kbd-hint { text-align: center; font-size: 0.72rem; color: #484f58; margin-top: 9px; }
 
 .settings {
@@ -149,7 +156,10 @@ h1 { font-size: 1.8rem; font-weight: 700; color: #58a6ff; }
   <div class="reveal-area"><div id="revealContent"></div></div>
   <p class="hint" id="hintText"></p>
   <div class="buttons-grid" id="buttonsGrid"></div>
-  <button class="next-btn" id="nextBtn" onclick="nextNote()">Next Note →</button>
+  <div class="next-row">
+    <button class="next-btn" id="nextBtn" onclick="nextNote()">Next Note →</button>
+    <button class="replay-btn" id="replayBtn" onclick="playScale(currentScale.notes)" style="display:none">↺ Replay</button>
+  </div>
   <p class="kbd-hint">Keyboard: A–G to answer &nbsp;·&nbsp; Enter / Space for next</p>
 </div>
 
@@ -562,6 +572,7 @@ function nextScale() {
   document.getElementById('revealContent').innerHTML = '';
   document.getElementById('nextBtn').classList.remove('show');
   document.getElementById('nextBtn').textContent = 'Next Scale →';
+  document.getElementById('replayBtn').style.display = 'none';
   document.querySelectorAll('.note-btn').forEach(b => { b.classList.remove('correct','wrong'); b.disabled=false; });
   const hint = document.getElementById('hintText');
   hint.className = 'hint'; hint.textContent = '';
@@ -588,6 +599,7 @@ function answerScale(letter, btn) {
       document.getElementById('revealContent').innerHTML =
         `<span class="feedback-msg ok">✓ Scale complete!</span>`;
       document.getElementById('nextBtn').classList.add('show');
+      document.getElementById('replayBtn').style.display = 'block';
       playScale(currentScale.notes);
     } else {
       drawScaleStaff(currentScale.notes, scaleNoteIdx);
