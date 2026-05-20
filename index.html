@@ -430,7 +430,7 @@ function generateScale() {
   return { name: def.name, notes };
 }
 
-function drawScaleStaff(notes, activeIdx) {
+function drawScaleStaff(notes, activeIdx, playingIdx = -1) {
   const svg = document.getElementById('staffSvg');
   svg.innerHTML = '';
   drawStaffLines(svg, SR);
@@ -448,11 +448,16 @@ function drawScaleStaff(notes, activeIdx) {
     drawNote(svg, note.pos, nx, 8, color, 11);
     if (note.acc) drawAccidental(svg, note.pos, nx, note.acc);
 
-    // Ring highlight around the current note
     if (curr) {
       el('ellipse', {
         cx: nx, cy: posY(note.pos), rx: 12, ry: 8.5,
         fill: 'none', stroke: '#58a6ff', 'stroke-width': 2
+      }, svg);
+    }
+    if (i === playingIdx) {
+      el('ellipse', {
+        cx: nx, cy: posY(note.pos), rx: 14, ry: 10,
+        fill: 'none', stroke: '#f0b84b', 'stroke-width': 2.5
       }, svg);
     }
   });
@@ -559,8 +564,7 @@ function nextScale() {
   document.getElementById('nextBtn').textContent = 'Next Scale →';
   document.querySelectorAll('.note-btn').forEach(b => { b.classList.remove('correct','wrong'); b.disabled=false; });
   const hint = document.getElementById('hintText');
-  hint.className = 'hint scale-label';
-  hint.textContent = currentScale.name;
+  hint.className = 'hint'; hint.textContent = '';
   drawScaleStaff(currentScale.notes, 0);
 }
 
@@ -578,11 +582,13 @@ function answerScale(letter, btn) {
     if (scaleNoteIdx === currentScale.notes.length) {
       scaleDone = true;
       drawScaleStaff(currentScale.notes, scaleNoteIdx);
-      document.getElementById('hintText').className = 'hint';
-      document.getElementById('hintText').textContent = '';
+      const doneHint = document.getElementById('hintText');
+      doneHint.className = 'hint scale-label';
+      doneHint.textContent = currentScale.name;
       document.getElementById('revealContent').innerHTML =
-        `<span class="feedback-msg ok">✓ ${currentScale.name} complete!</span>`;
+        `<span class="feedback-msg ok">✓ Scale complete!</span>`;
       document.getElementById('nextBtn').classList.add('show');
+      playScale(currentScale.notes);
     } else {
       drawScaleStaff(currentScale.notes, scaleNoteIdx);
     }
@@ -593,6 +599,56 @@ function answerScale(letter, btn) {
     setTimeout(() => btn.classList.remove('wrong'), 350);
     updateStats();
   }
+}
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function midiToFreq(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
+
+function noteToMidi(name) {
+  const s = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+  return 12 * (parseInt(name.slice(-1)) + 1) + s[name[0]];
+}
+
+function playPianoNote(ctx, freq, t) {
+  const gain = ctx.createGain();
+  gain.connect(ctx.destination);
+  gain.gain.setValueAtTime(0, t);
+  gain.gain.linearRampToValueAtTime(0.45, t + 0.012);
+  gain.gain.exponentialRampToValueAtTime(0.22, t + 0.15);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 1.4);
+
+  const osc = ctx.createOscillator();
+  osc.type = 'triangle';
+  osc.frequency.value = freq;
+  osc.connect(gain);
+  osc.start(t);
+  osc.stop(t + 1.5);
+}
+
+function playScale(notes) {
+  const ctx = getAudioCtx();
+  const gap = 0.55;
+
+  notes.forEach((note, i) => {
+    const base = CLEF_NOTES[clef].find(n => n.pos === note.pos);
+    if (!base) return;
+    let midi = noteToMidi(base.name);
+    if (note.acc === '#') midi += 1;
+    if (note.acc === 'b') midi -= 1;
+    const t = ctx.currentTime + 0.05 + i * gap;
+    playPianoNote(ctx, midiToFreq(midi), t);
+    setTimeout(() => drawScaleStaff(notes, notes.length, i), (0.05 + i * gap) * 1000);
+  });
+
+  setTimeout(() => drawScaleStaff(notes, notes.length, -1), (0.05 + notes.length * gap) * 1000);
 }
 
 // ── Shared ────────────────────────────────────────────────────────────────────
